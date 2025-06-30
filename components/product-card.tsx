@@ -64,33 +64,35 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
 
   if (viewMode === "list") {
     return (
-      <Card className="overflow-hidden border-green-200 dark:border-gray-700 hover:shadow-lg transition-shadow dark:bg-gray-800">
+      <Card className="overflow-hidden border-green-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] dark:bg-gray-800 animate-slide-up">
         <div className="flex">
-          <div className="relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0">
+          <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
             <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
             {product.discount && product.discount > 0 && (
-              <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-xs">-{product.discount}%</Badge>
+              <Badge className="absolute top-1 left-1 bg-red-500 hover:bg-red-600 text-xs px-1 py-0.5">
+                -{product.discount}%
+              </Badge>
             )}
           </div>
-          <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
-            <div className="space-y-2">
+          <div className="flex-1 p-3 md:p-4 flex flex-col justify-between min-w-0">
+            <div className="space-y-1 md:space-y-2">
               <Badge
                 variant="outline"
-                className="text-green-600 border-green-600 dark:text-green-400 dark:border-green-400 w-fit"
+                className="text-green-600 border-green-600 dark:text-green-400 dark:border-green-400 w-fit text-xs"
               >
                 {product.category}
               </Badge>
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white line-clamp-2">
+              <h3 className="text-sm md:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                 {product.name}
               </h3>
               {showPrice && discountedPrice && (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400">
+                    <span className="text-lg md:text-xl font-bold text-green-600 dark:text-green-400">
                       {Math.round(discountedPrice).toLocaleString()} so'm
                     </span>
                     {product.discount && product.discount > 0 && product.price && (
-                      <span className="text-sm md:text-lg text-gray-500 dark:text-gray-400 line-through">
+                      <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400 line-through">
                         {product.price.toLocaleString()} so'm
                       </span>
                     )}
@@ -98,14 +100,14 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
                 </div>
               )}
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-3">
               <Link href={`/product/${product.id}`} className="flex-1">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400"
+                  className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
                 >
-                  <Eye className="h-4 w-4 mr-2" />
+                  <Eye className="h-3 w-3 mr-1" />
                   Ko'rish
                 </Button>
               </Link>
@@ -113,9 +115,9 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
                 onClick={handleShare}
                 variant="outline"
                 size="sm"
-                className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 px-3 bg-transparent"
+                className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 px-2 bg-transparent h-8"
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
@@ -128,30 +130,32 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
   }
 
   return (
-    <Card className="overflow-hidden border-green-200 dark:border-gray-700 hover:shadow-lg transition-shadow dark:bg-gray-800">
+    <Card className="overflow-hidden border-green-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105 dark:bg-gray-800 animate-slide-up">
       <div className="relative aspect-square">
         <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
         {product.discount && product.discount > 0 && (
-          <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">-{product.discount}%</Badge>
+          <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-xs">-{product.discount}%</Badge>
         )}
       </div>
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <Badge
           variant="outline"
-          className="text-green-600 border-green-600 mb-2 dark:text-green-400 dark:border-green-400"
+          className="text-green-600 border-green-600 mb-2 dark:text-green-400 dark:border-green-400 text-xs"
         >
           {product.category}
         </Badge>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{product.name}</h3>
+        <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 min-h-[2.5rem] md:min-h-[3rem]">
+          {product.name}
+        </h3>
         {showPrice && discountedPrice && (
-          <div className="space-y-1 mb-4">
+          <div className="space-y-1 mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-green-600 dark:text-green-400">
+              <span className="text-lg md:text-xl font-bold text-green-600 dark:text-green-400">
                 {Math.round(discountedPrice).toLocaleString()} so'm
               </span>
             </div>
             {product.discount && product.discount > 0 && product.price && (
-              <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+              <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400 line-through">
                 {product.price.toLocaleString()} so'm
               </span>
             )}
@@ -162,9 +166,9 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
             <Button
               variant="outline"
               size="sm"
-              className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400"
+              className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
             >
-              <Eye className="h-4 w-4 mr-1" />
+              <Eye className="h-3 w-3 mr-1" />
               Ko'rish
             </Button>
           </Link>
@@ -172,9 +176,9 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
             onClick={handleShare}
             variant="outline"
             size="sm"
-            className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 bg-transparent"
+            className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 bg-transparent px-2 h-8"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-3 w-3" />
           </Button>
         </div>
         {shareSuccess && (

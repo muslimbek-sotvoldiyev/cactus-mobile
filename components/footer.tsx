@@ -90,7 +90,7 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-green-400" />
-                <span className="text-gray-400">Yangiqurgon</span>
+                <span className="text-gray-400">Toshkent sh., Chilonzor tumani</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-green-400" />

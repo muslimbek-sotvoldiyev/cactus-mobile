@@ -115,7 +115,7 @@ export default function ShopPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(6) // 6 items per page
+  const [itemsPerPage] = useState(15) // 15 items per page
 
   useEffect(() => {
     if (searchQuery) {

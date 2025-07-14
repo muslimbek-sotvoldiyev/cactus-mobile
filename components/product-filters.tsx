@@ -17,6 +17,7 @@ interface FilterProps {
 export function ProductFilters({ onFilterChange }: FilterProps) {
   const [filters, setFilters] = useState({
     categories: [] as string[],
+    brands: [] as string[],
     minPrice: 0,
     maxPrice: 20000000,
     sortBy: "name",
@@ -27,16 +28,24 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
   const filterRef = useRef<HTMLDivElement>(null)
 
   const categories = [
-    { value: "telefon", label: "Telefonlar", count: 4 },
-    { value: "zaryatnik", label: "Zaryatniklar", count: 3 },
-    { value: "aksessuar", label: "Aksessuarlar", count: 1 },
-    { value: "quloqchin", label: "Quloqchinlar", count: 2 },
-    { value: "himoya", label: "Himoya oynalari", count: 5 },
-    { value: "kabel", label: "Kabellar", count: 3 },
+    { value: "telefon", label: "Telefonlar", count: 26 },
+    { value: "aksessuar", label: "Aksessuarlar", count: 8 },
+  ]
+
+  const brands = [
+    // Telefon brendlari
+    { value: "apple", label: "Apple", count: 15, category: "telefon" },
+    { value: "samsung", label: "Samsung", count: 6, category: "telefon" },
+    { value: "xiaomi", label: "Xiaomi", count: 5, category: "telefon" },
+    // Aksessuar brendlari
+    { value: "anker", label: "Anker", count: 3, category: "aksessuar" },
+    { value: "belkin", label: "Belkin", count: 2, category: "aksessuar" },
+    { value: "universal", label: "Universal", count: 3, category: "aksessuar" },
   ]
 
   const sortOptions = [
     { value: "name", label: "Nom bo'yicha" },
+    { value: "brand", label: "Brend bo'yicha" },
     { value: "price-low", label: "Arzon narxdan" },
     { value: "price-high", label: "Qimmat narxdan" },
   ]
@@ -46,7 +55,18 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
       ? filters.categories.filter((cat) => cat !== categoryValue)
       : [...filters.categories, categoryValue]
 
-    const newFilters = { ...filters, categories: newCategories }
+    // Kategoriya o'zgarganda brendlarni tozalash
+    const newFilters = { ...filters, categories: newCategories, brands: [] }
+    setFilters(newFilters)
+    onFilterChange(newFilters)
+  }
+
+  const handleBrandChange = (brandValue: string) => {
+    const newBrands = filters.brands.includes(brandValue)
+      ? filters.brands.filter((brand) => brand !== brandValue)
+      : [...filters.brands, brandValue]
+
+    const newFilters = { ...filters, brands: newBrands }
     setFilters(newFilters)
     onFilterChange(newFilters)
   }
@@ -71,6 +91,7 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
   const clearFilters = () => {
     const defaultFilters = {
       categories: [],
+      brands: [],
       minPrice: 0,
       maxPrice: 20000000,
       sortBy: "name",
@@ -80,7 +101,12 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
     onFilterChange(defaultFilters)
   }
 
-  const hasActiveFilters = filters.categories.length > 0 || priceRange[0] > 0 || priceRange[1] < 20000000
+  const hasActiveFilters =
+    filters.categories.length > 0 || filters.brands.length > 0 || priceRange[0] > 0 || priceRange[1] < 20000000
+
+  // Get available brands based on selected categories
+  const availableBrands =
+    filters.categories.length > 0 ? brands.filter((brand) => filters.categories.includes(brand.category)) : brands
 
   // Close filter when clicking outside
   useEffect(() => {
@@ -110,7 +136,7 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
               Kategoriyalar
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 max-h-64 overflow-y-auto">
+          <CardContent className="space-y-1">
             {categories.map((category) => (
               <button
                 key={category.value}
@@ -148,6 +174,52 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
             ))}
           </CardContent>
         </Card>
+
+        {/* Brands - faqat kategoriya tanlanganda ko'rsatiladi */}
+        {filters.categories.length > 0 && (
+          <Card className="border-green-100 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-green-700 dark:text-green-400">Brendlar</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 max-h-64 overflow-y-auto">
+              {availableBrands.map((brand) => (
+                <button
+                  key={brand.value}
+                  onClick={() => handleBrandChange(brand.value)}
+                  className={`w-full flex items-center justify-between p-2 rounded-lg transition-all text-left hover:scale-[1.02] ${
+                    filters.brands.includes(brand.value)
+                      ? "bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                        filters.brands.includes(brand.value)
+                          ? "bg-green-600 border-green-600 dark:bg-green-500 dark:border-green-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      {filters.brands.includes(brand.value) && <Check className="h-3 w-3 text-white" />}
+                    </div>
+                    <span
+                      className={`text-sm font-medium ${
+                        filters.brands.includes(brand.value)
+                          ? "text-green-700 dark:text-green-300"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      {brand.label}
+                    </span>
+                  </div>
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 dark:border-gray-600 dark:text-gray-400">
+                    {brand.count}
+                  </Badge>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-green-100 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <CardHeader className="pb-3">
@@ -245,7 +317,7 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
                 variant="secondary"
                 className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs px-1.5 py-0.5"
               >
-                {filters.categories.length > 0 && `${filters.categories.length}`}
+                {filters.categories.length + filters.brands.length || ""}
               </Badge>
             )}
           </div>
@@ -274,7 +346,7 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
                 {/* Categories */}
                 <div>
                   <h3 className="text-base font-semibold text-green-700 dark:text-green-400 mb-3">Kategoriyalar</h3>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                  <div className="space-y-1">
                     {categories.map((category) => (
                       <button
                         key={category.value}
@@ -314,21 +386,54 @@ export function ProductFilters({ onFilterChange }: FilterProps) {
                       </button>
                     ))}
                   </div>
-                  {filters.categories.length > 3 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {filters.categories.slice(0, 3).map((cat) => (
-                        <Badge key={cat} variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
-                          {categories.find((c) => c.value === cat)?.label}
-                        </Badge>
-                      ))}
-                      {filters.categories.length > 3 && (
-                        <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
-                          +{filters.categories.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
                 </div>
+
+                {/* Brands - faqat kategoriya tanlanganda ko'rsatiladi */}
+                {filters.categories.length > 0 && (
+                  <div>
+                    <h3 className="text-base font-semibold text-green-700 dark:text-green-400 mb-3">Brendlar</h3>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {availableBrands.map((brand) => (
+                        <button
+                          key={brand.value}
+                          onClick={() => handleBrandChange(brand.value)}
+                          className={`w-full flex items-center justify-between p-2 rounded-lg transition-all text-left ${
+                            filters.brands.includes(brand.value)
+                              ? "bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800"
+                              : "hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                filters.brands.includes(brand.value)
+                                  ? "bg-green-600 border-green-600 dark:bg-green-500 dark:border-green-500"
+                                  : "border-gray-300 dark:border-gray-600"
+                              }`}
+                            >
+                              {filters.brands.includes(brand.value) && <Check className="h-3 w-3 text-white" />}
+                            </div>
+                            <span
+                              className={`text-sm font-medium ${
+                                filters.brands.includes(brand.value)
+                                  ? "text-green-700 dark:text-green-300"
+                                  : "text-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              {brand.label}
+                            </span>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-1.5 py-0.5 dark:border-gray-600 dark:text-gray-400"
+                          >
+                            {brand.count}
+                          </Badge>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Price Range */}
                 <div>

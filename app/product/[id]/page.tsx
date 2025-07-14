@@ -15,16 +15,6 @@ const product = {
   image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&h=500&fit=crop",
   category: "Telefon",
   discount: 10,
-  description:
-    "iPhone 15 Pro - eng so'nggi texnologiyalar bilan jihozlangan smartfon. A17 Pro chip, titanium korpus, professional kamera tizimi va boshqa ko'plab imkoniyatlar.",
-  specifications: [
-    "Ekran: 6.1 dyuym Super Retina XDR",
-    "Chip: A17 Pro",
-    "Kamera: 48MP asosiy kamera",
-    "Xotira: 128GB, 256GB, 512GB, 1TB",
-    "Batareya: Kun bo'yi ishlash",
-    "Material: Titanium",
-  ],
 }
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
@@ -97,23 +87,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             </div>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Tavsif</h3>
-            <p className="text-gray-600 leading-relaxed">{product.description}</p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Xususiyatlari</h3>
-            <ul className="space-y-2">
-              {product.specifications.map((spec, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-600">{spec}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4">
             <Button onClick={handleContactClick} className="flex-1 bg-green-600 hover:bg-green-700">
               <Phone className="mr-2 h-4 w-4" />
@@ -122,7 +95,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <Button
               onClick={handleWhatsAppClick}
               variant="outline"
-              className="flex-1 border-green-600 text-green-600 hover:bg-green-50"
+              className="flex-1 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
               WhatsApp
@@ -131,7 +104,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               onClick={handleShare}
               variant="outline"
               size="icon"
-              className="border-green-600 text-green-600 hover:bg-green-50"
+              className="border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
             >
               <Share2 className="h-4 w-4" />
             </Button>

@@ -15,32 +15,21 @@ interface Product {
   image: string
   category: string
   discount?: number
+  brand?: string
+  model?: string
 }
 
 interface ProductCardProps {
   product: Product
   viewMode: "grid" | "list"
   showPrice?: boolean
+  showOnlyNameAndPrice?: boolean
 }
 
-export function ProductCard({ product, viewMode, showPrice = true }: ProductCardProps) {
+export function ProductCard({ product, viewMode, showPrice = true, showOnlyNameAndPrice = false }: ProductCardProps) {
   const [shareSuccess, setShareSuccess] = useState(false)
   const discountedPrice =
     product.discount && product.price ? product.price * (1 - product.discount / 100) : product.price
-
-  const handleContactClick = () => {
-    const message = `Salom! ${product.name} haqida ma'lumot olmoqchiman.`
-    const telegramUrl = `https://t.me/cactusmobile_bot?start=${encodeURIComponent(message)}`
-    window.open(telegramUrl, "_blank")
-  }
-
-  const handleWhatsAppClick = () => {
-    const message = `Salom! ${product.name} haqida ma'lumot olmoqchiman.${
-      showPrice && discountedPrice ? ` Narxi: ${Math.round(discountedPrice).toLocaleString()} so'm` : ""
-    }`
-    const whatsappUrl = `https://wa.me/998901234567?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, "_blank")
-  }
 
   const handleShare = async () => {
     const shareData = {
@@ -76,12 +65,6 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
           </div>
           <div className="flex-1 p-3 md:p-4 flex flex-col justify-between min-w-0">
             <div className="space-y-1 md:space-y-2">
-              <Badge
-                variant="outline"
-                className="text-green-600 border-green-600 dark:text-green-400 dark:border-green-400 w-fit text-xs"
-              >
-                {product.category}
-              </Badge>
               <h3 className="text-sm md:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                 {product.name}
               </h3>
@@ -100,26 +83,28 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
                 </div>
               )}
             </div>
-            <div className="flex gap-2 mt-3">
-              <Link href={`/product/${product.id}`} className="flex-1">
+            {!showOnlyNameAndPrice && (
+              <div className="flex gap-2 mt-3">
+                <Link href={`/product/${product.id}`} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    Ko'rish
+                  </Button>
+                </Link>
                 <Button
+                  onClick={handleShare}
                   variant="outline"
                   size="sm"
-                  className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
+                  className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 px-2 bg-transparent h-8"
                 >
-                  <Eye className="h-3 w-3 mr-1" />
-                  Ko'rish
+                  <Share2 className="h-3 w-3" />
                 </Button>
-              </Link>
-              <Button
-                onClick={handleShare}
-                variant="outline"
-                size="sm"
-                className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 px-2 bg-transparent h-8"
-              >
-                <Share2 className="h-3 w-3" />
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         </div>
         {shareSuccess && (
@@ -138,12 +123,6 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
         )}
       </div>
       <CardContent className="p-3 md:p-4">
-        <Badge
-          variant="outline"
-          className="text-green-600 border-green-600 mb-2 dark:text-green-400 dark:border-green-400 text-xs"
-        >
-          {product.category}
-        </Badge>
         <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 min-h-[2.5rem] md:min-h-[3rem]">
           {product.name}
         </h3>
@@ -161,26 +140,28 @@ export function ProductCard({ product, viewMode, showPrice = true }: ProductCard
             )}
           </div>
         )}
-        <div className="flex gap-2">
-          <Link href={`/product/${product.id}`} className="flex-1">
+        {!showOnlyNameAndPrice && (
+          <div className="flex gap-2">
+            <Link href={`/product/${product.id}`} className="flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Ko'rish
+              </Button>
+            </Link>
             <Button
+              onClick={handleShare}
               variant="outline"
               size="sm"
-              className="w-full bg-white dark:bg-gray-800 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 text-xs h-8"
+              className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 bg-transparent px-2 h-8"
             >
-              <Eye className="h-3 w-3 mr-1" />
-              Ko'rish
+              <Share2 className="h-3 w-3" />
             </Button>
-          </Link>
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            size="sm"
-            className="border-green-600 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:hover:bg-green-950 dark:text-green-400 dark:border-green-400 bg-transparent px-2 h-8"
-          >
-            <Share2 className="h-3 w-3" />
-          </Button>
-        </div>
+          </div>
+        )}
         {shareSuccess && (
           <div className="text-center text-green-600 dark:text-green-400 text-xs mt-2">✓ Havola nusxalandi!</div>
         )}

@@ -5,9 +5,10 @@ import { useSearchParams } from "next/navigation"
 import { ProductCard } from "@/components/product-card"
 import { ProductFilters } from "@/components/product-filters"
 import { Button } from "@/components/ui/button"
-import { Grid, List, Search, Store } from "lucide-react"
+import { Grid, List, Search, Store, ArrowLeft } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { PriceDisclaimer } from "@/components/price-disclaimer"
+import Link from "next/link"
 
 const products = [
   // iPhone modellari
@@ -426,51 +427,61 @@ const products = [
 
 export default function ShopPage() {
   const searchParams = useSearchParams()
-  const searchQuery = searchParams.get("search") || ""
+  const selectedCategory = searchParams.get("category") || ""
   const selectedBrand = searchParams.get("brand") || ""
-  const selectedSeries = searchParams.get("series") || ""
 
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [currentView, setCurrentView] = useState<"all" | "brands" | "series" | "models">("all")
+  const [currentView, setCurrentView] = useState<"categories" | "brands" | "products">("categories")
 
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(15)
 
+  // Get unique categories
+  const categories = [
+    {
+      name: "Telefonlar",
+      value: "telefon",
+      count: products.filter((p) => p.category === "telefon").length,
+      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300&h=300&fit=crop",
+    },
+    {
+      name: "Aksessuarlar",
+      value: "aksessuar",
+      count: products.filter((p) => p.category === "aksessuar").length,
+      image: "https://images.unsplash.com/photo-1609592806596-4d8b5b1d7d0e?w=300&h=300&fit=crop",
+    },
+  ]
+
+  // Get brands for selected category
+  const brands = selectedCategory
+    ? Array.from(new Set(products.filter((p) => p.category === selectedCategory).map((p) => p.brand))).map((brand) => ({
+        name: products.find((p) => p.brand === brand)?.brandName || brand,
+        value: brand,
+        count: products.filter((p) => p.category === selectedCategory && p.brand === brand).length,
+        image: products.find((p) => p.category === selectedCategory && p.brand === brand)?.image || "",
+      }))
+    : []
+
+  // Get products for selected category and brand
+  const categoryBrandProducts =
+    selectedCategory && selectedBrand
+      ? products.filter((p) => p.category === selectedCategory && p.brand === selectedBrand)
+      : []
+
   useEffect(() => {
-    if (searchQuery) {
-      const filtered = products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.model.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-      setFilteredProducts(filtered)
+    if (selectedCategory && selectedBrand) {
+      setCurrentView("products")
+      setFilteredProducts(categoryBrandProducts)
+    } else if (selectedCategory) {
+      setCurrentView("brands")
     } else {
-      setFilteredProducts(products)
+      setCurrentView("categories")
     }
-  }, [searchQuery])
+  }, [selectedCategory, selectedBrand])
 
   const handleFilterChange = (filters: any) => {
-    let filtered = products
-
-    // Apply search filter first
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.model.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    if (filters.categories && filters.categories.length > 0) {
-      filtered = filtered.filter((product) => filters.categories.includes(product.category))
-    }
-
-    if (filters.brands && filters.brands.length > 0) {
-      filtered = filtered.filter((product) => filters.brands.includes(product.brand))
-    }
+    let filtered = categoryBrandProducts
 
     if (filters.minPrice || filters.maxPrice) {
       filtered = filtered.filter((product) => {
@@ -512,10 +523,10 @@ export default function ShopPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Reset to first page when filters change
+  // Reset to first page when view changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [filteredProducts.length])
+  }, [currentView, filteredProducts.length])
 
   return (
     <div className="container mx-auto px-3 md:px-4 py-6 md:py-8">
@@ -534,75 +545,178 @@ export default function ShopPage() {
 
       <PriceDisclaimer />
 
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        <aside className="lg:w-1/4">
-          <ProductFilters onFilterChange={handleFilterChange} />
-        </aside>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 mb-6 text-sm">
+        <Link href="/shop" className="text-green-600 hover:text-green-700 dark:text-green-400">
+          Do'kon
+        </Link>
+        {selectedCategory && (
+          <>
+            <span className="text-gray-400">/</span>
+            <Link
+              href={`/shop?category=${selectedCategory}`}
+              className="text-green-600 hover:text-green-700 dark:text-green-400"
+            >
+              {categories.find((c) => c.value === selectedCategory)?.name}
+            </Link>
+          </>
+        )}
+        {selectedBrand && (
+          <>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              {brands.find((b) => b.value === selectedBrand)?.name}
+            </span>
+          </>
+        )}
+      </div>
 
-        <main className="lg:w-3/4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {searchQuery ? `"${searchQuery}" uchun natijalar` : "Barcha mahsulotlar"}
-              </h2>
-              {searchQuery && (
-                <p className="text-gray-600 dark:text-gray-400 mt-1">{filteredProducts.length} ta mahsulot topildi</p>
-              )}
-              {!searchQuery && (
-                <p className="text-gray-600 dark:text-gray-400 mt-1">Jami {filteredProducts.length} ta mahsulot</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className={
-                  viewMode === "grid"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "border-green-200 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:text-green-400"
-                }
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className={
-                  viewMode === "list"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "border-green-200 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:text-green-400"
-                }
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+      {/* Back Button */}
+      {(selectedCategory || selectedBrand) && (
+        <div className="mb-6">
+          <Link href={selectedBrand ? `/shop?category=${selectedCategory}` : selectedCategory ? "/shop" : "/shop"}>
+            <Button variant="outline" className="bg-white text-green-600 border-green-600 hover:bg-green-50">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Orqaga
+            </Button>
+          </Link>
+        </div>
+      )}
 
-          <div
-            className={`grid gap-4 ${
-              viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"
-            }`}
-          >
-            {currentProducts.map((product) => (
-              <ProductCard key={product.id} product={product} viewMode={viewMode} showOnlyNameAndPrice={true} />
+      {/* Categories View */}
+      {currentView === "categories" && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Kategoriyani tanlang</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {categories.map((category) => (
+              <Link key={category.value} href={`/shop?category=${category.value}`}>
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-gray-700 p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <img
+                      src={category.image || "/placeholder.svg"}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = "none"
+                        target.nextElementSibling!.classList.remove("hidden")
+                      }}
+                    />
+                    <div className="w-full h-full bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center hidden">
+                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {category.name.charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{category.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{category.count} ta mahsulot</p>
+                </div>
+              </Link>
             ))}
           </div>
+        </div>
+      )}
 
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+      {/* Brands View */}
+      {currentView === "brands" && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            {categories.find((c) => c.value === selectedCategory)?.name} brendlarini tanlang
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {brands.map((brand) => (
+              <Link key={brand.value} href={`/shop?category=${selectedCategory}&brand=${brand.value}`}>
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-gray-700 p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <img
+                      src={brand.image || "/placeholder.svg"}
+                      alt={brand.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = "none"
+                        target.nextElementSibling!.classList.remove("hidden")
+                      }}
+                    />
+                    <div className="w-full h-full bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center hidden">
+                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {brand.name.charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{brand.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{brand.count} ta model</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 text-lg">
-                {searchQuery ? `"${searchQuery}" uchun hech narsa topilmadi` : "Hech qanday mahsulot topilmadi"}
-              </p>
-              {searchQuery && <p className="text-gray-400 mt-2">Boshqa kalit so'zlar bilan qidirib ko'ring</p>}
+      {/* Products View */}
+      {currentView === "products" && (
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <aside className="lg:w-1/4">
+            <ProductFilters onFilterChange={handleFilterChange} />
+          </aside>
+
+          <main className="lg:w-3/4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {brands.find((b) => b.value === selectedBrand)?.name} mahsulotlari
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Jami {filteredProducts.length} ta mahsulot</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={
+                    viewMode === "grid"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "border-green-200 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:text-green-400"
+                  }
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={
+                    viewMode === "list"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "border-green-200 text-green-600 hover:bg-green-50 dark:border-gray-600 dark:text-green-400"
+                  }
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          )}
-        </main>
-      </div>
+
+            <div
+              className={`grid gap-4 ${
+                viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"
+              }`}
+            >
+              {currentProducts.map((product) => (
+                <ProductCard key={product.id} product={product} viewMode={viewMode} showOnlyNameAndPrice={true} />
+              ))}
+            </div>
+
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-lg">Hech qanday mahsulot topilmadi</p>
+              </div>
+            )}
+          </main>
+        </div>
+      )}
     </div>
   )
 }
